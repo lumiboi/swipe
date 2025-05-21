@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SwipeTogether Demo</title>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 80px; }
+    .main-btn { background: #2563eb; color: #fff; border: none; font-size: 1.2em; padding: 15px 36px; border-radius: 10px; cursor: pointer; margin-bottom: 16px; }
+    .main-btn:hover { background: #1e40af; }
+    input { padding: 10px; font-size: 1.1em; border-radius: 7px; border: 1px solid #888; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <h1>SwipeTogether</h1>
+  <button class="main-btn" onclick="createRoom()">Yeni Oda Oluştur</button>
+  <br>
+  <form onsubmit="joinRoom(); return false;">
+    <input id="roomInput" placeholder="Oda kodu" required>
+    <button class="main-btn" type="submit">Odaya Katıl</button>
+  </form>
+  <script>
+    function createRoom() {
+      const roomId = Math.random().toString(36).substr(2, 8);
+      window.location.href = "/room/" + roomId;
+    }
+    function joinRoom() {
+      const roomId = document.getElementById("roomInput").value;
+      window.location.href = "/room/" + roomId;
+    }
+  </script>
+</body>
+</html>
