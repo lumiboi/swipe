@@ -43,22 +43,30 @@
   </div>
   <script>
     const room = "{{ room_id }}";
-    const socket = io();
     document.getElementById("roomlink").innerText = window.location.href;
-    // Kullanıcı adı
-    let username = localStorage.getItem("swipetogether_username") || "Anonim";
+
+    // KULLANICI ADI: Her girişte sor
+    let username = localStorage.getItem("swipetogether_username");
+    while (!username) {
+      username = prompt("Odaya girmek için adını yaz:");
+      if (username) {
+        localStorage.setItem("swipetogether_username", username);
+      }
+    }
     document.getElementById("usernameBar").innerText = "Kullanıcı adın: " + username;
-    let isSharing = false;
-    let peers = {}; // {socketId: peer}
+
+    const socket = io();
     let myStream = null;
     let isScreenSharer = false;
+    let isSharing = false;
+    let peers = {}; // {socketId: peer}
 
     // Odaya katıldığını bildir
     socket.emit("join", { room, username });
 
-    // Yeni katılan izleyiciye ekran paylaşımı (initiator: true sadece screen sharer'da)
-    socket.on("user-joined", ({ sid, username: otherName }) => {
-      if (isScreenSharer && myStream) {
+    // EKRAN PAYLAŞAN KİŞİ: Diğer katılımcı geldikçe onun için peer aç (initiator:true)
+    socket.on("user-joined", ({ sid }) => {
+      if (isScreenSharer && myStream && sid !== socket.id) {
         let peer = new SimplePeer({ initiator: true, trickle: false, stream: myStream });
         peers[sid] = peer;
         peer.on("signal", signal => {
@@ -67,11 +75,11 @@
       }
     });
 
-    // Signal mesajı geldiğinde peer'ı oluştur veya mevcutsa ona ilet
+    // Sinyal geldiğinde (herkes): Eğer peer yoksa oluştur (initiator:false), varsa signal() ilet
     socket.on("signal", data => {
-      let sid = data.sid || data.target; // sinyal gönderenin veya hedefin id'si
+      let sid = data.sid || data.target;
       if (!peers[sid]) {
-        // İzleyici (initiator: false)
+        // İzleyici: initiator:false, ekran paylaşan peer'dan stream alır
         let peer = new SimplePeer({ initiator: false, trickle: false });
         peers[sid] = peer;
         peer.on("signal", signal => {
@@ -87,7 +95,7 @@
       }
     });
 
-    // Ekran paylaşımı başlat
+    // EKRAN PAYLAŞ: Sadece bir kere başlatılabilir!
     function startScreen() {
       if (isSharing) return;
       navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }).then(stream => {
@@ -96,12 +104,13 @@
         isScreenSharer = true;
         document.getElementById("screen").srcObject = stream;
         document.getElementById("shareBtn").disabled = true;
-        // Oda katılımcılarını iste
+        // Odaya sonradan girenler için user-joined event bekleyecek
+        // Ama ilkten biri varsa, o anki bağlananlar için de peer başlat:
         socket.emit("get-users", { room });
       }).catch(e => alert("Ekran paylaşımı başlatılamadı: " + e));
     }
 
-    // Chat
+    // CHAT
     function sendChat(e) {
       e.preventDefault();
       const msg = document.getElementById("chatInput").value;
