@@ -1,27 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SwipeTogether Demo</title>
+  <title>SwipeTogether</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 80px; }
-    .main-btn { background: #2563eb; color: #fff; border: none; font-size: 1.2em; padding: 15px 36px; border-radius: 10px; cursor: pointer; margin-bottom: 16px; }
-    .main-btn:hover { background: #1e40af; }
-    input { padding: 10px; font-size: 1.1em; border-radius: 7px; border: 1px solid #888; margin-bottom: 12px; }
-    .user-form { display: flex; flex-direction:column; align-items: center; gap: 10px; margin-bottom: 18px; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg,#f9ce34 0%,#ee2a7b 60%,#6228d7 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: 'Roboto', Arial, sans-serif; margin: 0;
+    }
+    .main-card {
+      background: #fff;
+      border-radius: 30px;
+      box-shadow: 0 4px 32px #ee2a7b33;
+      padding: 48px 36px 36px 36px;
+      max-width: 400px;
+      width: 98vw;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .ig-icon {
+      width: 78px;
+      margin-bottom: 20px;
+    }
+    .main-title {
+      font-size: 2.05em;
+      font-weight: 700;
+      background: linear-gradient(90deg,#ee2a7b,#f9ce34,#6228d7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 14px;
+      letter-spacing: -1px;
+    }
+    .main-btn {
+      background: linear-gradient(90deg,#ee2a7b 0%,#f9ce34 100%);
+      color: #fff;
+      border: none;
+      font-weight: bold;
+      font-size: 1.12em;
+      padding: 14px 0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: box-shadow .16s;
+      box-shadow: 0 2px 8px #ee2a7b22;
+      margin-top: 7px;
+      width: 100%;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+    .main-btn:hover {
+      box-shadow: 0 6px 18px #ee2a7b44;
+      filter: brightness(1.09);
+    }
+    input {
+      padding: 13px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #dbdbdb;
+      font-size: 1em;
+      margin-bottom: 10px;
+      transition: border 0.18s;
+      outline: none;
+      width: 100%;
+    }
+    input:focus { border-color: #ee2a7b; }
+    form { width:100%; }
+    .room-form { display: flex; gap: 7px; }
+    .room-form input { margin-bottom: 0; }
+    @media (max-width: 500px) {
+      .main-card { padding: 26px 10px; }
+      .main-title { font-size: 1.35em; }
+    }
   </style>
 </head>
 <body>
-  <h1>SwipeTogether</h1>
-  <form class="user-form" onsubmit="saveName(event)">
-    <input id="username" placeholder="Kullanıcı adın" required maxlength="20" autocomplete="off" />
-    <button class="main-btn" type="submit">Kaydet</button>
-  </form>
-  <button class="main-btn" onclick="createRoom()">Yeni Oda Oluştur</button>
-  <br>
-  <form onsubmit="joinRoom(); return false;">
-    <input id="roomInput" placeholder="Oda kodu" required>
-    <button class="main-btn" type="submit">Odaya Katıl</button>
-  </form>
+  <div class="main-card">
+    <img class="ig-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+    <div class="main-title">SwipeTogether</div>
+    <form class="user-form" onsubmit="saveName(event)">
+      <input id="username" placeholder="Kullanıcı adın" required maxlength="20" autocomplete="off" />
+      <button class="main-btn" type="submit">Kaydet</button>
+    </form>
+    <button class="main-btn" onclick="createRoom()">Yeni Oda Oluştur</button>
+    <form class="room-form" onsubmit="joinRoom(); return false;">
+      <input id="roomInput" placeholder="Oda kodu" required>
+      <button class="main-btn" type="submit">Odaya Katıl</button>
+    </form>
+  </div>
   <script>
     // Kullanıcı adını kaydet
     function saveName(e) {
@@ -32,7 +96,6 @@
         alert("Kullanıcı adınız kaydedildi.");
       }
     }
-    // Sayfa yüklenince otomatik doldur
     window.onload = () => {
       const n = localStorage.getItem("swipetogether_username");
       if (n) document.getElementById("username").value = n;
