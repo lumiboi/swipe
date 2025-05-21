@@ -161,9 +161,9 @@
       try {
         const stream = await navigator.mediaDevices.getDisplayMedia({
           video: {
-            frameRate: { ideal: 60, max: 60 },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
+            frameRate: { ideal: 30, max: 30 },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
           },
           audio: true
         });
@@ -171,7 +171,7 @@
         // FPS constraint'ini tekrar uygula (bazı Chrome sürümlerinde zorunlu)
         const videoTrack = stream.getVideoTracks()[0];
         if (videoTrack && videoTrack.applyConstraints) {
-          await videoTrack.applyConstraints({ frameRate: 60 });
+          await videoTrack.applyConstraints({ frameRate: 30 });
         }
 
         myStream = stream;
@@ -192,8 +192,8 @@
           if (sender) {
             const parameters = sender.getParameters();
             if (!parameters.encodings) parameters.encodings = [{}];
-            parameters.encodings[0].maxBitrate = 5_000_000; // 5 Mbps
-            parameters.encodings[0].maxFramerate = 60;
+            parameters.encodings[0].maxBitrate = 2_000_000; // 2 Mbps
+            parameters.encodings[0].maxFramerate = 30;
             sender.setParameters(parameters);
           }
         });
