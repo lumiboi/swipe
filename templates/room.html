@@ -47,7 +47,7 @@
       <h3 style="color:#ee2a7b;margin-bottom:13px;">Sohbet</h3>
       <div class="messages" id="messages"></div>
       <form class="chat-form" onsubmit="sendChat(event)">
-        <input id="chatInput" class="chat-input" placeholder="Instagram linki paylaş..." autocomplete="off">
+        <input id="chatInput" class="chat-input" placeholder="Mesaj yaz..." autocomplete="off">
         <button class="main-btn" type="submit">Gönder</button>
       </form>
     </div>
@@ -133,23 +133,25 @@
       }
     });
 
-    // SADECE INSTAGRAM.COM VEYA INSTAGRAM APP!
+    // SADECE MASAÜSTÜNDE INSTAGRAM.COM VEYA INSTAGRAM APP!
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+    }
+
     function startScreen() {
       if (isSharing) return;
       navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(stream => {
-        // Sekme veya uygulama adını kontrol et
-        const track = stream.getVideoTracks()[0];
-        const label = track.label.toLowerCase();
-        // Sadece instagram.com sekmesi veya Instagram uygulaması adı için izin ver
-        const allow = (
-          label.includes("instagram.com") ||              // Chrome/Firefox sekme paylaşımı
-          label === "instagram" ||                        // Uygulama paylaşımı (bazı sistemlerde)
-          label.includes("instagram")                     // Diğer varyasyonlar (ör: Instagram - ...)
-        );
-        if (!allow) {
-          alert("Sadece instagram.com sekmesi veya Instagram uygulaması paylaşılabilir!\n\nSeçtiğiniz kaynak: " + track.label);
-          stream.getTracks().forEach(t => t.stop());
-          return;
+        // Mobilde kısıtlama yok!
+        if (!isMobile()) {
+          const track = stream.getVideoTracks()[0];
+          const label = track.label || "";
+          console.log("Paylaşılan kaynak label:", label);
+          // Sadece instagram.com veya Instagram uygulaması adı varsa izin ver
+          if (!label.toLowerCase().includes("instagram")) {
+            alert("Sadece Instagram uygulaması veya instagram.com sekmesi paylaşılabilir!\n\nSeçtiğiniz kaynak: " + label);
+            stream.getTracks().forEach(t => t.stop());
+            return;
+          }
         }
         myStream = stream;
         isSharing = true;
@@ -181,15 +183,11 @@
       peers = {};
     }
 
-    // CHAT - SADECE INSTAGRAM LİNKİ!
+    // CHAT - HER ŞEY YAZILABİLİR!
     function sendChat(e) {
       e.preventDefault();
       const msg = document.getElementById("chatInput").value.trim();
-      const igPattern = /^https?:\/\/(www\.)?instagram\.com\/[A-Za-z0-9._%-]+(\/.*)?$/i;
-      if (!igPattern.test(msg)) {
-        alert("Sadece Instagram linki paylaşabilirsin!");
-        return;
-      }
+      if (!msg) return;
       socket.emit("chat", { room, msg, username });
       document.getElementById("chatInput").value = "";
     }
@@ -200,9 +198,16 @@
     function appendMsg(from, text, isMe) {
       const msgBox = document.getElementById("messages");
       const div = document.createElement("div");
-      div.innerHTML = `<b>${from}${isMe ? " (Sen)" : ""}:</b> <a href="${text}" target="_blank">${text}</a>`;
+      // Linkleri otomatik tespit et, diğer her şeyi düz yaz
+      div.innerHTML = `<b>${from}${isMe ? " (Sen)" : ""}:</b> ${linkify(text)}`;
       msgBox.appendChild(div);
       msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    // Basit linkify: metindeki linkleri tıklanabilir yap
+    function linkify(text) {
+      const urlPattern = /(\bhttps?:\/\/[^\s]+)/gi;
+      return text.replace(urlPattern, '<a href="$1" target="_blank">$1</a>');
     }
   </script>
 </body>
