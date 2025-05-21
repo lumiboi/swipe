@@ -11,7 +11,7 @@ for pkg in ["flask", "flask_socketio", "eventlet"]:
     install_and_import(pkg)
 
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, join_room, emit
+from flask_socketio import SocketIO, join_room, emit, rooms
 import os
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -47,6 +47,14 @@ def handle_chat(data):
     msg = data["msg"]
     username = data.get("username", usernames.get(request.sid, "Anonim"))
     emit("chat", {"sid": request.sid, "msg": msg, "username": username}, to=room)
+
+@socketio.on("get-users")
+def handle_get_users(data):
+    room = data["room"]
+    # O anki tüm kullanıcıların sid'ını ekrana paylaşan kişiye bildir
+    for sid in socketio.server.manager.rooms["/"].get(room, set()):
+        if sid != request.sid:
+            emit("user-joined", {"sid": sid, "username": usernames.get(sid, "Anonim")}, room=request.sid)
 
 @socketio.on("disconnect")
 def handle_disconnect():
