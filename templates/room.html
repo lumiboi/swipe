@@ -61,7 +61,6 @@
     let isSharing = false;
     let peers = {}; // {socketId: peer}
 
-    // Her client kendi socket.id'sini bilir
     let mySocketId = null;
     socket.on("connect", () => {
       mySocketId = socket.id;
@@ -70,7 +69,7 @@
     // Odaya katıldığını bildir
     socket.emit("join", { room, username });
 
-    // EKRAN PAYLAŞAN KİŞİ: Diğer katılımcı geldikçe onun için peer aç (initiator:true)
+    // Ekran paylaşan kişi için: yeni biri gelirse onun için peer oluştur (initiator:true)
     socket.on("user-joined", ({ sid }) => {
       if (isScreenSharer && myStream && sid !== mySocketId && !peers[sid]) {
         let peer = new SimplePeer({ initiator: true, trickle: false, stream: myStream });
@@ -79,17 +78,15 @@
           socket.emit("signal", { room, signal, target: sid });
         });
         peer.on("error", err => {
-          // Hata logla, alert gösterme
           console.error("Peer error (initiator):", err);
         });
       }
     });
 
-    // Sinyal geldiğinde (herkes): Eğer peer yoksa oluştur (initiator:false), varsa signal() ilet
+    // Sinyal geldiğinde: İzleyici ise peer aç (initiator:false)
     socket.on("signal", data => {
       let sid = data.sid || data.target;
       if (!peers[sid]) {
-        // İzleyici: initiator:false, ekran paylaşan peer'dan stream alır
         let peer = new SimplePeer({ initiator: false, trickle: false });
         peers[sid] = peer;
         peer.on("signal", signal => {
@@ -99,7 +96,6 @@
           document.getElementById("screen").srcObject = stream;
         });
         peer.on("error", err => {
-          // Hata logla, alert gösterme
           console.error("Peer error (viewer):", err);
         });
         peer.signal(data.signal);
@@ -108,7 +104,6 @@
       }
     });
 
-    // EKRAN PAYLAŞ: Sadece bir kere başlatılabilir!
     function startScreen() {
       if (isSharing) return;
       navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }).then(stream => {
@@ -117,13 +112,11 @@
         isScreenSharer = true;
         document.getElementById("screen").srcObject = stream;
         document.getElementById("shareBtn").disabled = true;
-        // Odaya sonradan girenler için user-joined event bekleyecek
-        // Ama ilkten biri varsa, o anki bağlananlar için de peer başlat:
         socket.emit("get-users", { room });
       }).catch(e => alert("Ekran paylaşımı başlatılamadı: " + e));
     }
 
-    // CHAT (sadece server'dan gelen mesajı ekrana yaz, kendi yazınca yazma!)
+    // CHAT
     function sendChat(e) {
       e.preventDefault();
       const msg = document.getElementById("chatInput").value;
