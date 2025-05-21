@@ -42,13 +42,14 @@
     </div>
   </div>
   <script>
+    // ICE sunucuları (STUN + TURN)
+    const ICE_SERVERS = [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+      { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+      { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
+    ];
 
-const ICE_SERVERS = [
-  { urls: "stun:stun.l.google.com:19302" },
-  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
-];
     const room = "{{ room_id }}";
     document.getElementById("roomlink").innerText = window.location.href;
 
@@ -79,7 +80,12 @@ const ICE_SERVERS = [
     // Ekran paylaşan kişi için: yeni biri gelirse onun için peer oluştur (initiator:true)
     socket.on("user-joined", ({ sid }) => {
       if (isScreenSharer && myStream && sid !== mySocketId && !peers[sid]) {
-        let peer = new SimplePeer({ initiator: true, trickle: false, stream: myStream });
+        let peer = new SimplePeer({
+          initiator: true,
+          trickle: false,
+          stream: myStream,
+          config: { iceServers: ICE_SERVERS }
+        });
         peers[sid] = peer;
         peer.on("signal", signal => {
           socket.emit("signal", { room, signal, target: sid });
@@ -94,7 +100,11 @@ const ICE_SERVERS = [
     socket.on("signal", data => {
       let sid = data.sid || data.target;
       if (!peers[sid]) {
-        let peer = new SimplePeer({ initiator: false, trickle: false });
+        let peer = new SimplePeer({
+          initiator: false,
+          trickle: false,
+          config: { iceServers: ICE_SERVERS }
+        });
         peers[sid] = peer;
         peer.on("signal", signal => {
           socket.emit("signal", { room, signal, target: sid });
