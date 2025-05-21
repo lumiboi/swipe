@@ -7,10 +7,15 @@
     .main-btn { background: #2563eb; color: #fff; border: none; font-size: 1.2em; padding: 15px 36px; border-radius: 10px; cursor: pointer; margin-bottom: 16px; }
     .main-btn:hover { background: #1e40af; }
     input { padding: 10px; font-size: 1.1em; border-radius: 7px; border: 1px solid #888; margin-bottom: 12px; }
+    .user-form { display: flex; flex-direction:column; align-items: center; gap: 10px; margin-bottom: 18px; }
   </style>
 </head>
 <body>
   <h1>SwipeTogether</h1>
+  <form class="user-form" onsubmit="saveName(event)">
+    <input id="username" placeholder="Kullanıcı adın" required maxlength="20" autocomplete="off" />
+    <button class="main-btn" type="submit">Kaydet</button>
+  </form>
   <button class="main-btn" onclick="createRoom()">Yeni Oda Oluştur</button>
   <br>
   <form onsubmit="joinRoom(); return false;">
@@ -18,11 +23,29 @@
     <button class="main-btn" type="submit">Odaya Katıl</button>
   </form>
   <script>
+    // Kullanıcı adını kaydet
+    function saveName(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      if (username) {
+        localStorage.setItem("swipetogether_username", username);
+        alert("Kullanıcı adınız kaydedildi.");
+      }
+    }
+    // Sayfa yüklenince otomatik doldur
+    window.onload = () => {
+      const n = localStorage.getItem("swipetogether_username");
+      if (n) document.getElementById("username").value = n;
+    };
     function createRoom() {
+      const username = localStorage.getItem("swipetogether_username");
+      if (!username) { alert("Lütfen önce kullanıcı adı girin."); return; }
       const roomId = Math.random().toString(36).substr(2, 8);
       window.location.href = "/room/" + roomId;
     }
     function joinRoom() {
+      const username = localStorage.getItem("swipetogether_username");
+      if (!username) { alert("Lütfen önce kullanıcı adı girin."); return; }
       const roomId = document.getElementById("roomInput").value;
       window.location.href = "/room/" + roomId;
     }
