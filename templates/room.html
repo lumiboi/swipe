@@ -136,10 +136,39 @@
       }
     });
 
-    // Ekran paylaşımı (mobil ve masaüstü tamamında serbest!)
-    function isScreenShareSupported() {
-      return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+    // Mobil kontrol yardımcıları
+    function isMobile() {
+      return /android|iphone|ipad|ipod/i.test(navigator.userAgent);
     }
+    function isAndroidChrome() {
+      return /android/i.test(navigator.userAgent) && /chrome/i.test(navigator.userAgent);
+    }
+    function isIOSSafari() {
+      return /iphone|ipad|ipod/i.test(navigator.userAgent) && /safari/i.test(navigator.userAgent) && !/crios/i.test(navigator.userAgent);
+    }
+    function isScreenShareSupported() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) return false;
+      if (isMobile()) {
+        if (isAndroidChrome() && parseInt((navigator.userAgent.match(/Chrome\/(\d+)/) || [])[1] || 0) >= 100) return true;
+        if (isIOSSafari()) return true; // iOS 17+ Safari için deneriz
+        return false;
+      }
+      return true;
+    }
+
+    window.addEventListener("DOMContentLoaded", function() {
+      const shareBtn = document.getElementById("shareBtn");
+      const mobileInfo = document.getElementById("mobileInfo");
+      if (!isScreenShareSupported()) {
+        shareBtn.disabled = true;
+        mobileInfo.style.display = "";
+        if (isMobile()) {
+          mobileInfo.innerHTML = "Mobil cihazlarda ekran paylaşımı tarayıcı tarafından desteklenmiyor.<br>Android (Chrome 100+) veya iOS (Safari 17+) sürümlerini deneyebilirsiniz.";
+        } else {
+          mobileInfo.innerText = "Bu tarayıcıda ekran paylaşımı desteklenmiyor.";
+        }
+      }
+    });
 
     function startScreen() {
       if (isSharing) return;
@@ -182,7 +211,7 @@
       peers = {};
     }
 
-    // CHAT - HER ŞEY YAZILABİLİR!
+    // CHAT
     function sendChat(e) {
       e.preventDefault();
       const msg = document.getElementById("chatInput").value.trim();
@@ -202,7 +231,7 @@
       msgBox.scrollTop = msgBox.scrollHeight;
     }
 
-    // Basit linkify: metindeki linkleri tıklanabilir yap
+    // Basit linkify
     function linkify(text) {
       const urlPattern = /(\bhttps?:\/\/[^\s]+)/gi;
       return text.replace(urlPattern, '<a href="$1" target="_blank">$1</a>');
