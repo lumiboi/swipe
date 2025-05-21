@@ -9,7 +9,7 @@
   <style>
     body { font-family: 'Roboto',sans-serif; margin:0; background: linear-gradient(135deg,#f9ce34 0%,#ee2a7b 60%,#6228d7 100%); min-height:100vh; }
     .header { background:#fff; color:#ee2a7b; padding:14px 20px; font-size:1.35em; font-weight:bold; border-radius:0 0 22px 22px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 18px #ee2a7b13; margin-bottom: 7px; letter-spacing: -1px;}
-    .header img { width: 36px; }
+    .header img { width: 36px; cursor: pointer; }
     .flex { display: flex; gap: 30px; margin: 30px auto; max-width: 1100px; justify-content: center;}
     .chat { width: 330px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #ee2a7b22; padding: 20px; display: flex; flex-direction: column; height: 430px; }
     .messages { flex:1; overflow-y: auto; margin-bottom: 10px; background: #f8f8fa; border-radius: 8px; padding: 12px;}
@@ -25,12 +25,15 @@
     .share-link { font-size: 13px; color: #444; margin-top: 6px; text-align: center;}
     .username-bar { background: linear-gradient(90deg,#ee2a7b,#f9ce34,#6228d7); color: #fff; padding: 7px 22px; font-size: 1em; border-radius: 0 0 14px 14px; margin-bottom: 7px;}
     .info-msg { color: #e11d48; font-size: 0.98em; margin-bottom: 10px; text-align:center;}
+    .homepage-btn-block { margin: 40px auto 0 auto; text-align: center;}
+    .homepage-btn { background: linear-gradient(90deg,#ee2a7b 0%,#f9ce34 100%); color: #fff; border: none; font-size: 1.13em; padding: 12px 36px; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px #ee2a7b22;}
+    .homepage-btn:hover { filter: brightness(1.09);}
     @media (max-width: 1100px) { .flex { flex-direction: column; gap: 15px; margin: 15px auto;} video { width: 92vw;} .chat { width: 98vw; max-width: 340px;} .video-box { min-width:0; max-width:99vw; } }
   </style>
 </head>
 <body>
   <div class="header">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" id="siteLogo" alt="Site Logo">
     SwipeTogether — Oda: {{ room_id }}
   </div>
   <div id="usernameBar" class="username-bar"></div>
@@ -55,7 +58,15 @@
       </form>
     </div>
   </div>
+  <div class="homepage-btn-block">
+    <button class="homepage-btn" onclick="window.location.href='/'">Anasayfa</button>
+  </div>
   <script>
+    // Logo tıklanınca anasayfaya git
+    document.getElementById("siteLogo").addEventListener("click", function() {
+      window.location.href = "/";
+    });
+
     // ICE servers
     const ICE_SERVERS = [
       { urls: "stun:stun.relay.metered.ca:80" },
