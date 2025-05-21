@@ -158,7 +158,14 @@
         alert("Bu tarayıcıda ekran paylaşımı desteklenmiyor.");
         return;
       }
-      navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(stream => {
+      navigator.mediaDevices.getDisplayMedia({
+        video: {
+          frameRate: { ideal: 30, max: 60 },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: true
+      }).then(stream => {
         myStream = stream;
         isSharing = true;
         isScreenSharer = true;
@@ -169,6 +176,17 @@
 
         stream.getTracks().forEach(track => {
           track.onended = stopScreen;
+        });
+
+        // FPS/Bitrate arttırıcı (her peer için)
+        Object.values(peers).forEach(peer => {
+          let sender = peer._pc.getSenders().find(s => s.track && s.track.kind === 'video');
+          if (sender) {
+            const parameters = sender.getParameters();
+            if (!parameters.encodings) parameters.encodings = [{}];
+            parameters.encodings[0].maxBitrate = 3_000_000; // 3 Mbps
+            sender.setParameters(parameters);
+          }
         });
       }).catch(e => {
         if (e && e.name !== "AbortError") {
