@@ -16,7 +16,7 @@
     .chat-form { display: flex; gap: 8px; }
     .chat-input { flex: 1; padding: 8px; border-radius: 8px; border: 1.5px solid #ee2a7b; }
     .video-box { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #ee2a7b22; padding: 18px; display: flex; flex-direction: column; align-items: center; min-width: 340px; }
-    video { width: 640px; border-radius: 14px; border: 2px solid #ee2a7b; background: #222; margin-bottom: 10px;}
+    video { width: 640px; border-radius: 14px; border: 2px solid #ee2a7b; background: #222; margin-bottom: 10px; }
     .main-btn { background: linear-gradient(90deg,#ee2a7b 0%,#f9ce34 100%); color: #fff; border: none; font-size: 1.13em; padding: 12px 24px; border-radius: 10px; cursor: pointer; margin-bottom: 12px; font-weight: bold; box-shadow: 0 2px 8px #ee2a7b22; margin-right: 8px;}
     .main-btn[disabled] { filter: grayscale(0.8); opacity: 0.6; cursor: not-allowed; }
     .main-btn:hover:enabled { filter: brightness(1.08); }
@@ -63,11 +63,10 @@
   </div>
   <script>
     // Logo tıklanınca anasayfaya git
-    document.getElementById("siteLogo").addEventListener("click", function() {
+    document.getElementById("siteLogo").addEventListener("click", () => {
       window.location.href = "/";
     });
 
-    // ICE servers
     const ICE_SERVERS = [
       { urls: "stun:stun.relay.metered.ca:80" },
       { urls: "turn:standard.relay.metered.ca:80", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" },
@@ -79,7 +78,6 @@
     const room = "{{ room_id }}";
     document.getElementById("roomlink").innerText = window.location.href;
 
-    // KULLANICI ADI
     let username = localStorage.getItem("swipetogether_username");
     while (!username) {
       username = prompt("Odaya girmek için adını yaz:");
@@ -93,26 +91,25 @@
     let myStream = null;
     let isScreenSharer = false;
     let isSharing = false;
-    let peers = {}; // {socketId: peer}
+    let peers = {};
 
     let mySocketId = null;
     socket.on("connect", () => {
       mySocketId = socket.id;
     });
 
-    // Odaya katıldığını bildir
     socket.emit("join", { room, username });
 
-    // Ekran paylaşan kişi için: yeni biri gelirse onun için peer oluştur (initiator:true)
     socket.on("user-joined", ({ sid }) => {
       if (isScreenSharer && myStream && sid !== mySocketId && !peers[sid]) {
-        let peer = new SimplePeer({
+        const peer = new SimplePeer({
           initiator: true,
           trickle: false,
           stream: myStream,
           config: { iceServers: ICE_SERVERS }
         });
         peers[sid] = peer;
+
         peer.on("signal", signal => {
           socket.emit("signal", { room, signal, target: sid });
         });
@@ -122,145 +119,5 @@
       }
     });
 
-    // Sinyal geldiğinde: İzleyici ise peer aç (initiator:false)
     socket.on("signal", data => {
-      let sid = data.sid || data.target;
-      if (!peers[sid]) {
-        let peer = new SimplePeer({
-          initiator: false,
-          trickle: false,
-          config: { iceServers: ICE_SERVERS }
-        });
-        peers[sid] = peer;
-        peer.on("signal", signal => {
-          socket.emit("signal", { room, signal, target: sid });
-        });
-        peer.on("stream", stream => {
-          document.getElementById("screen").srcObject = stream;
-        });
-        peer.on("error", err => {
-          console.error("Peer error (viewer):", err);
-        });
-        peer.signal(data.signal);
-      } else {
-        peers[sid].signal(data.signal);
-      }
-    });
-
-    // Ekran paylaşımı (mobil ve masaüstü tamamında serbest!)
-    function isScreenShareSupported() {
-      return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
-    }
-
-    async function startScreen() {
-      if (isSharing) return;
-      if (!isScreenShareSupported()) {
-        alert("Bu tarayıcıda ekran paylaşımı desteklenmiyor.");
-        return;
-      }
-      try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({
-          video: {
-            frameRate: { ideal: 60, max: 60 },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: true
-        });
-
-        // FPS constraint'ini tekrar uygula (bazı Chrome sürümlerinde zorunlu)
-        const videoTrack = stream.getVideoTracks()[0];
-        if (videoTrack && videoTrack.applyConstraints) {
-          await videoTrack.applyConstraints({ frameRate: 60 });
-        }
-
-        myStream = stream;
-        isSharing = true;
-        isScreenSharer = true;
-        document.getElementById("screen").srcObject = stream;
-        document.getElementById("shareBtn").disabled = true;
-        document.getElementById("stopBtn").style.display = "";
-        socket.emit("get-users", { room });
-
-        stream.getTracks().forEach(track => {
-          track.onended = stopScreen;
-        });
-
-        // Peer bitrate ve FPS için parametreyi yükselt
-        Object.values(peers).forEach(peer => {
-          let sender = peer._pc.getSenders().find(s => s.track && s.track.kind === 'video');
-          if (sender) {
-            const parameters = sender.getParameters();
-            if (!parameters.encodings) parameters.encodings = [{}];
-            parameters.encodings[0].maxBitrate = 5_000_000; // 5 Mbps
-            parameters.encodings[0].maxFramerate = 60;
-            sender.setParameters(parameters);
-          }
-        });
-      } catch (e) {
-        if (e && e.name !== "AbortError") {
-          alert("Ekran paylaşımı başlatılamadı: " + e.message);
-        }
-      }
-    }
-
-    function stopScreen() {
-      if (myStream) {
-        myStream.getTracks().forEach(track => track.stop());
-        myStream = null;
-      }
-      isScreenSharer = false;
-      isSharing = false;
-      document.getElementById("screen").srcObject = null;
-      document.getElementById("shareBtn").disabled = false;
-      document.getElementById("stopBtn").style.display = "none";
-      for (const sid in peers) {
-        try { peers[sid].destroy(); } catch (e) {}
-      }
-      peers = {};
-    }
-
-    // FPS'i ekranda görmek için (isteğe bağlı)
-    const video = document.getElementById('screen');
-    let lastFrame = performance.now();
-    let frames = 0;
-    function showFPS() {
-      frames++;
-      const now = performance.now();
-      if (now - lastFrame > 1000) {
-        video.title = `FPS: ${frames}`;
-        frames = 0;
-        lastFrame = now;
-      }
-      requestAnimationFrame(showFPS);
-    }
-    showFPS();
-
-    // CHAT - HER ŞEY YAZILABİLİR!
-    function sendChat(e) {
-      e.preventDefault();
-      const msg = document.getElementById("chatInput").value.trim();
-      if (!msg) return;
-      socket.emit("chat", { room, msg, username });
-      document.getElementById("chatInput").value = "";
-    }
-    socket.on("chat", data => {
-      appendMsg(data.username || "Diğer", data.msg, data.sid === mySocketId);
-    });
-
-    function appendMsg(from, text, isMe) {
-      const msgBox = document.getElementById("messages");
-      const div = document.createElement("div");
-      div.innerHTML = `<b>${from}${isMe ? " (Sen)" : ""}:</b> ${linkify(text)}`;
-      msgBox.appendChild(div);
-      msgBox.scrollTop = msgBox.scrollHeight;
-    }
-
-    // Basit linkify: metindeki linkleri tıklanabilir yap
-    function linkify(text) {
-      const urlPattern = /(\bhttps?:\/\/[^\s]+)/gi;
-      return text.replace(urlPattern, '<a href="$1" target="_blank">$1</a>');
-    }
-  </script>
-</body>
-</html>
+      const sid = data.sid || data.target
