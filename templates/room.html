@@ -42,12 +42,29 @@
     </div>
   </div>
   <script>
-    // Güncel ve önerilen OpenRelay ICE sunucu ayarları
+    // Metered.ca ICE sunucun ile tam entegre!
     const ICE_SERVERS = [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-      { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-      { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
+      { urls: "stun:stun.relay.metered.ca:80" },
+      {
+        urls: "turn:standard.relay.metered.ca:80",
+        username: "1d314db62543883bb998dd93",
+        credential: "9k8DwsDoeoJUikJP",
+      },
+      {
+        urls: "turn:standard.relay.metered.ca:80?transport=tcp",
+        username: "1d314db62543883bb998dd93",
+        credential: "9k8DwsDoeoJUikJP",
+      },
+      {
+        urls: "turn:standard.relay.metered.ca:443",
+        username: "1d314db62543883bb998dd93",
+        credential: "9k8DwsDoeoJUikJP",
+      },
+      {
+        urls: "turns:standard.relay.metered.ca:443?transport=tcp",
+        username: "1d314db62543883bb998dd93",
+        credential: "9k8DwsDoeoJUikJP",
+      }
     ];
 
     const room = "{{ room_id }}";
