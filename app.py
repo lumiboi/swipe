@@ -11,7 +11,7 @@ for pkg in ["flask", "flask_socketio", "eventlet"]:
     install_and_import(pkg)
 
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, join_room, emit, rooms
+from flask_socketio import SocketIO, join_room, emit
 import os
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -60,6 +60,6 @@ def handle_get_users(data):
 def handle_disconnect():
     usernames.pop(request.sid, None)
 
-import os
-port = int(os.environ.get("PORT", 5000))
-socketio.run(app, host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=port)
