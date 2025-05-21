@@ -2,38 +2,79 @@
 <html>
 <head>
   <title>Oda: {{ room_id }} | SwipeTogether</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://unpkg.com/simple-peer@9.11.1/simplepeer.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; margin:0; background: #f4f7fa; }
-    .flex { display: flex; gap: 30px; margin: 30px; }
-    .chat { width: 300px; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px #0001; padding: 20px; display: flex; flex-direction: column; height: 420px; }
-    .messages { flex:1; overflow-y: auto; margin-bottom: 10px; }
+    body { font-family: 'Roboto',sans-serif; margin:0; background: linear-gradient(135deg,#f9ce34 0%,#ee2a7b 60%,#6228d7 100%); min-height:100vh; }
+    .header {
+      background:#fff;
+      color:#ee2a7b;
+      padding:14px 20px;
+      font-size:1.35em;
+      font-weight:bold;
+      border-radius:0 0 22px 22px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 4px 18px #ee2a7b13;
+      margin-bottom: 7px;
+      letter-spacing: -1px;
+    }
+    .header img { width: 36px; }
+    .flex { display: flex; gap: 30px; margin: 30px auto; max-width: 1100px; justify-content: center;}
+    .chat { width: 330px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #ee2a7b22; padding: 20px; display: flex; flex-direction: column; height: 430px; }
+    .messages { flex:1; overflow-y: auto; margin-bottom: 10px; background: #f8f8fa; border-radius: 8px; padding: 12px;}
     .chat-form { display: flex; gap: 8px; }
-    .chat-input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #2563eb; }
-    .video-box { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px #0001; padding: 14px; }
-    video { width: 640px; border-radius: 8px; border: 2px solid #2563eb; background: #222; }
-    .main-btn { background: #2563eb; color: #fff; border: none; font-size: 1.15em; padding: 12px 22px; border-radius: 9px; cursor: pointer; margin-bottom: 12px; }
-    .main-btn:hover { background: #1e40af; }
-    .share-link { font-size: 13px; color: #444; margin-top: 6px; }
-    .username-bar { background: #2563eb; color: #fff; padding: 8px 22px; font-size: 1em; border-radius: 0 0 12px 12px; }
+    .chat-input { flex: 1; padding: 8px; border-radius: 8px; border: 1.5px solid #ee2a7b; }
+    .video-box { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #ee2a7b22; padding: 18px; display: flex; flex-direction: column; align-items: center; min-width: 340px; }
+    video { width: 640px; border-radius: 14px; border: 2px solid #ee2a7b; background: #222; margin-bottom: 10px;}
+    .main-btn {
+      background: linear-gradient(90deg,#ee2a7b 0%,#f9ce34 100%);
+      color: #fff;
+      border: none;
+      font-size: 1.13em;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px #ee2a7b22;
+      margin-right: 8px;
+    }
+    .main-btn:hover { filter: brightness(1.08); }
+    .end-btn { background: #e11d48 !important; }
+    .end-btn:hover { background: #991b1b !important; }
+    .share-link { font-size: 13px; color: #444; margin-top: 6px; text-align: center;}
+    .username-bar { background: linear-gradient(90deg,#ee2a7b,#f9ce34,#6228d7); color: #fff; padding: 7px 22px; font-size: 1em; border-radius: 0 0 14px 14px; margin-bottom: 7px;}
+    @media (max-width: 1100px) {
+      .flex { flex-direction: column; gap: 15px; margin: 15px auto;}
+      video { width: 92vw;}
+      .chat { width: 98vw; max-width: 340px;}
+      .video-box { min-width:0; max-width:99vw; }
+    }
   </style>
 </head>
 <body>
-  <div style="background:#2563eb;color:#fff;padding:16px;font-size:1.5em;font-weight:bold;">SwipeTogether — Oda: {{ room_id }}</div>
+  <div class="header">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png">
+    SwipeTogether — Oda: {{ room_id }}
+  </div>
   <div id="usernameBar" class="username-bar"></div>
   <div class="flex">
     <div class="video-box">
       <video id="screen" autoplay playsinline controls></video>
       <div>
         <button class="main-btn" onclick="startScreen()" id="shareBtn">Ekranını Paylaş</button>
+        <button class="main-btn end-btn" onclick="stopScreen()" id="stopBtn" style="display:none;">Yayını Sonlandır</button>
       </div>
       <div class="share-link">
         Oda linki: <b id="roomlink"></b>
       </div>
     </div>
     <div class="chat">
-      <h3>Sohbet</h3>
+      <h3 style="color:#ee2a7b;margin-bottom:13px;">Sohbet</h3>
       <div class="messages" id="messages"></div>
       <form class="chat-form" onsubmit="sendChat(event)">
         <input id="chatInput" class="chat-input" placeholder="Mesaj yaz..." autocomplete="off">
@@ -45,26 +86,10 @@
     // Metered.ca ICE sunucun ile tam entegre!
     const ICE_SERVERS = [
       { urls: "stun:stun.relay.metered.ca:80" },
-      {
-        urls: "turn:standard.relay.metered.ca:80",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      },
-      {
-        urls: "turn:standard.relay.metered.ca:80?transport=tcp",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      },
-      {
-        urls: "turn:standard.relay.metered.ca:443",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      },
-      {
-        urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      }
+      { urls: "turn:standard.relay.metered.ca:80", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" },
+      { urls: "turn:standard.relay.metered.ca:80?transport=tcp", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" },
+      { urls: "turn:standard.relay.metered.ca:443", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" },
+      { urls: "turns:standard.relay.metered.ca:443?transport=tcp", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" }
     ];
 
     const room = "{{ room_id }}";
@@ -140,14 +165,35 @@
 
     function startScreen() {
       if (isSharing) return;
-      navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }).then(stream => {
+      navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(stream => {
         myStream = stream;
         isSharing = true;
         isScreenSharer = true;
         document.getElementById("screen").srcObject = stream;
         document.getElementById("shareBtn").disabled = true;
+        document.getElementById("stopBtn").style.display = "";
         socket.emit("get-users", { room });
+
+        stream.getTracks().forEach(track => {
+          track.onended = stopScreen;
+        });
       }).catch(e => alert("Ekran paylaşımı başlatılamadı: " + e));
+    }
+
+    function stopScreen() {
+      if (myStream) {
+        myStream.getTracks().forEach(track => track.stop());
+        myStream = null;
+      }
+      isScreenSharer = false;
+      isSharing = false;
+      document.getElementById("screen").srcObject = null;
+      document.getElementById("shareBtn").disabled = false;
+      document.getElementById("stopBtn").style.display = "none";
+      for (const sid in peers) {
+        try { peers[sid].destroy(); } catch (e) {}
+      }
+      peers = {};
     }
 
     // CHAT
