@@ -65,16 +65,6 @@
       { urls: "turns:standard.relay.metered.ca:443?transport=tcp", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" }
     ];
 
-    // Kullanıcı mobil mi?
-    function isMobile() {
-      return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
-    }
-
-    // Mobilde ekran paylaşımı destekleniyor mu?
-    function isScreenShareSupported() {
-      return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
-    }
-
     const room = "{{ room_id }}";
     document.getElementById("roomlink").innerText = window.location.href;
 
@@ -87,15 +77,6 @@
       }
     }
     document.getElementById("usernameBar").innerText = "Kullanıcı adın: " + username;
-
-    // Mobilde ekran paylaşımı yoksa butonu pasif yap
-    window.onload = function() {
-      if (isMobile() && !isScreenShareSupported()) {
-        document.getElementById("shareBtn").disabled = true;
-        document.getElementById("mobileInfo").style.display = "block";
-        document.getElementById("mobileInfo").textContent = "Mobil cihazlarda ekran paylaşımı desteklenmiyor.";
-      }
-    };
 
     const socket = io();
     let myStream = null;
@@ -155,7 +136,11 @@
       }
     });
 
-    // Ekran paylaşımı
+    // Ekran paylaşımı (mobil ve masaüstü tamamında serbest!)
+    function isScreenShareSupported() {
+      return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+    }
+
     function startScreen() {
       if (isSharing) return;
       if (!isScreenShareSupported()) {
@@ -163,17 +148,6 @@
         return;
       }
       navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(stream => {
-        // Masaüstünde sadece instagram.com veya Instagram uygulaması
-        if (!isMobile()) {
-          const track = stream.getVideoTracks()[0];
-          const label = (track.label || "").toLowerCase();
-          // Daha esnek kontrol: "instagram" kelimesi geçiyorsa izin ver
-          if (!label.includes("instagram")) {
-            alert("Sadece Instagram uygulaması veya instagram.com sekmesi paylaşılabilir!\n\nSeçtiğiniz kaynak: " + track.label);
-            stream.getTracks().forEach(t => t.stop());
-            return;
-          }
-        }
         myStream = stream;
         isSharing = true;
         isScreenSharer = true;
