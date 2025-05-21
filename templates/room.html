@@ -152,20 +152,28 @@
       return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
     }
 
-    function startScreen() {
+    async function startScreen() {
       if (isSharing) return;
       if (!isScreenShareSupported()) {
         alert("Bu tarayıcıda ekran paylaşımı desteklenmiyor.");
         return;
       }
-      navigator.mediaDevices.getDisplayMedia({
-        video: {
-          frameRate: { ideal: 30, max: 60 },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
-        audio: true
-      }).then(stream => {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            frameRate: { ideal: 60, max: 60 },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          },
+          audio: true
+        });
+
+        // FPS constraint'ini tekrar uygula (bazı Chrome sürümlerinde zorunlu)
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack && videoTrack.applyConstraints) {
+          await videoTrack.applyConstraints({ frameRate: 60 });
+        }
+
         myStream = stream;
         isSharing = true;
         isScreenSharer = true;
@@ -178,21 +186,22 @@
           track.onended = stopScreen;
         });
 
-        // FPS/Bitrate arttırıcı (her peer için)
+        // Peer bitrate ve FPS için parametreyi yükselt
         Object.values(peers).forEach(peer => {
           let sender = peer._pc.getSenders().find(s => s.track && s.track.kind === 'video');
           if (sender) {
             const parameters = sender.getParameters();
             if (!parameters.encodings) parameters.encodings = [{}];
-            parameters.encodings[0].maxBitrate = 3_000_000; // 3 Mbps
+            parameters.encodings[0].maxBitrate = 5_000_000; // 5 Mbps
+            parameters.encodings[0].maxFramerate = 60;
             sender.setParameters(parameters);
           }
         });
-      }).catch(e => {
+      } catch (e) {
         if (e && e.name !== "AbortError") {
           alert("Ekran paylaşımı başlatılamadı: " + e.message);
         }
-      });
+      }
     }
 
     function stopScreen() {
@@ -210,6 +219,22 @@
       }
       peers = {};
     }
+
+    // FPS'i ekranda görmek için (isteğe bağlı)
+    const video = document.getElementById('screen');
+    let lastFrame = performance.now();
+    let frames = 0;
+    function showFPS() {
+      frames++;
+      const now = performance.now();
+      if (now - lastFrame > 1000) {
+        video.title = `FPS: ${frames}`;
+        frames = 0;
+        lastFrame = now;
+      }
+      requestAnimationFrame(showFPS);
+    }
+    showFPS();
 
     // CHAT - HER ŞEY YAZILABİLİR!
     function sendChat(e) {
