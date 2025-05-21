@@ -2,179 +2,38 @@
 <html>
 <head>
   <title>Oda: {{ room_id }} | SwipeTogether</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://unpkg.com/simple-peer@9.11.1/simplepeer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: "Roboto", sans-serif;
-      margin: 0;
-      background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 60%, #6228d7 100%);
-      min-height: 100vh;
-    }
-    .header {
-      background: #fff;
-      color: #ee2a7b;
-      padding: 14px 20px;
-      font-size: 1.35em;
-      font-weight: bold;
-      border-radius: 0 0 22px 22px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      box-shadow: 0 4px 18px #ee2a7b13;
-      margin-bottom: 7px;
-      letter-spacing: -1px;
-    }
-    .header img {
-      width: 36px;
-      cursor: pointer;
-    }
-    .flex {
-      display: flex;
-      gap: 30px;
-      margin: 30px auto;
-      max-width: 1100px;
-      justify-content: center;
-    }
-    .chat {
-      width: 330px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px #ee2a7b22;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      height: 430px;
-    }
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: 10px;
-      background: #f8f8fa;
-      border-radius: 8px;
-      padding: 12px;
-    }
-    .chat-form {
-      display: flex;
-      gap: 8px;
-    }
-    .chat-input {
-      flex: 1;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1.5px solid #ee2a7b;
-    }
-    .video-box {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px #ee2a7b22;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 340px;
-    }
-    video {
-      width: 720px;
-      border-radius: 14px;
-      border: 2px solid #ee2a7b;
-      background: #222;
-      margin-bottom: 10px;
-    }
-    .main-btn {
-      background: linear-gradient(90deg, #ee2a7b 0%, #f9ce34 100%);
-      color: #fff;
-      border: none;
-      font-size: 1.13em;
-      padding: 12px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-bottom: 12px;
-      font-weight: bold;
-      box-shadow: 0 2px 8px #ee2a7b22;
-      margin-right: 8px;
-    }
-    .main-btn[disabled] {
-      filter: grayscale(0.8);
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .main-btn:hover:enabled {
-      filter: brightness(1.08);
-    }
-    .end-btn {
-      background: #e11d48 !important;
-    }
-    .end-btn:hover {
-      background: #991b1b !important;
-    }
-    .share-link {
-      font-size: 13px;
-      color: #444;
-      margin-top: 6px;
-      text-align: center;
-    }
-    .username-bar {
-      background: linear-gradient(90deg, #ee2a7b, #f9ce34, #6228d7);
-      color: #fff;
-      padding: 7px 22px;
-      font-size: 1em;
-      border-radius: 0 0 14px 14px;
-      margin-bottom: 7px;
-    }
-    .info-msg {
-      color: #e11d48;
-      font-size: 0.98em;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-    .homepage-btn-block {
-      margin: 40px auto 0 auto;
-      text-align: center;
-    }
-    .homepage-btn {
-      background: linear-gradient(90deg, #ee2a7b 0%, #f9ce34 100%);
-      color: #fff;
-      border: none;
-      font-size: 1.13em;
-      padding: 12px 36px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 2px 8px #ee2a7b22;
-    }
-    .homepage-btn:hover {
-      filter: brightness(1.09);
-    }
-    @media (max-width: 1100px) {
-      .flex {
-        flex-direction: column;
-        gap: 15px;
-        margin: 15px auto;
-      }
-      video {
-        width: 92vw;
-      }
-      .chat {
-        width: 98vw;
-        max-width: 340px;
-      }
-      .video-box {
-        min-width: 0;
-        max-width: 99vw;
-      }
-    }
+    body { font-family: 'Roboto',sans-serif; margin:0; background: linear-gradient(135deg,#f9ce34 0%,#ee2a7b 60%,#6228d7 100%); min-height:100vh; }
+    .header { background:#fff; color:#ee2a7b; padding:14px 20px; font-size:1.35em; font-weight:bold; border-radius:0 0 22px 22px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 18px #ee2a7b13; margin-bottom: 7px; letter-spacing: -1px;}
+    .header img { width: 36px; cursor: pointer; }
+    .flex { display: flex; gap: 30px; margin: 30px auto; max-width: 1100px; justify-content: center;}
+    .chat { width: 330px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #ee2a7b22; padding: 20px; display: flex; flex-direction: column; height: 430px; }
+    .messages { flex:1; overflow-y: auto; margin-bottom: 10px; background: #f8f8fa; border-radius: 8px; padding: 12px;}
+    .chat-form { display: flex; gap: 8px; }
+    .chat-input { flex: 1; padding: 8px; border-radius: 8px; border: 1.5px solid #ee2a7b; }
+    .video-box { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #ee2a7b22; padding: 18px; display: flex; flex-direction: column; align-items: center; min-width: 340px; }
+    video { width: 640px; border-radius: 14px; border: 2px solid #ee2a7b; background: #222; margin-bottom: 10px;}
+    .main-btn { background: linear-gradient(90deg,#ee2a7b 0%,#f9ce34 100%); color: #fff; border: none; font-size: 1.13em; padding: 12px 24px; border-radius: 10px; cursor: pointer; margin-bottom: 12px; font-weight: bold; box-shadow: 0 2px 8px #ee2a7b22; margin-right: 8px;}
+    .main-btn[disabled] { filter: grayscale(0.8); opacity: 0.6; cursor: not-allowed; }
+    .main-btn:hover:enabled { filter: brightness(1.08); }
+    .end-btn { background: #e11d48 !important; }
+    .end-btn:hover { background: #991b1b !important; }
+    .share-link { font-size: 13px; color: #444; margin-top: 6px; text-align: center;}
+    .username-bar { background: linear-gradient(90deg,#ee2a7b,#f9ce34,#6228d7); color: #fff; padding: 7px 22px; font-size: 1em; border-radius: 0 0 14px 14px; margin-bottom: 7px;}
+    .info-msg { color: #e11d48; font-size: 0.98em; margin-bottom: 10px; text-align:center;}
+    .homepage-btn-block { margin: 40px auto 0 auto; text-align: center;}
+    .homepage-btn { background: linear-gradient(90deg,#ee2a7b 0%,#f9ce34 100%); color: #fff; border: none; font-size: 1.13em; padding: 12px 36px; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px #ee2a7b22;}
+    .homepage-btn:hover { filter: brightness(1.09);}
+    @media (max-width: 1100px) { .flex { flex-direction: column; gap: 15px; margin: 15px auto;} video { width: 92vw;} .chat { width: 98vw; max-width: 340px;} .video-box { min-width:0; max-width:99vw; } }
   </style>
 </head>
 <body>
   <div class="header">
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
-      id="siteLogo"
-      alt="Site Logo"
-    />
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" id="siteLogo" alt="Site Logo">
     SwipeTogether — Oda: {{ room_id }}
   </div>
   <div id="usernameBar" class="username-bar"></div>
@@ -183,76 +42,44 @@
       <div id="mobileInfo" class="info-msg" style="display:none;"></div>
       <video id="screen" autoplay playsinline controls></video>
       <div>
-        <button class="main-btn" onclick="startScreen()" id="shareBtn">
-          Ekranını Paylaş
-        </button>
-        <button
-          class="main-btn end-btn"
-          onclick="stopScreen()"
-          id="stopBtn"
-          style="display:none"
-        >
-          Yayını Sonlandır
-        </button>
+        <button class="main-btn" onclick="startScreen()" id="shareBtn">Ekranını Paylaş</button>
+        <button class="main-btn end-btn" onclick="stopScreen()" id="stopBtn" style="display:none;">Yayını Sonlandır</button>
       </div>
       <div class="share-link">
         Oda linki: <b id="roomlink"></b>
       </div>
     </div>
     <div class="chat">
-      <h3 style="color: #ee2a7b; margin-bottom: 13px;">Sohbet</h3>
+      <h3 style="color:#ee2a7b;margin-bottom:13px;">Sohbet</h3>
       <div class="messages" id="messages"></div>
       <form class="chat-form" onsubmit="sendChat(event)">
-        <input
-          id="chatInput"
-          class="chat-input"
-          placeholder="Mesaj yaz..."
-          autocomplete="off"
-        />
+        <input id="chatInput" class="chat-input" placeholder="Mesaj yaz..." autocomplete="off">
         <button class="main-btn" type="submit">Gönder</button>
       </form>
     </div>
   </div>
   <div class="homepage-btn-block">
-    <button class="homepage-btn" onclick="window.location.href='/'">
-      Anasayfa
-    </button>
+    <button class="homepage-btn" onclick="window.location.href='/'">Anasayfa</button>
   </div>
-
   <script>
-    // Logo'ya tıklayınca anasayfaya yönlendir
-    document.getElementById("siteLogo").addEventListener("click", () => {
+    // Logo tıklanınca anasayfaya git
+    document.getElementById("siteLogo").addEventListener("click", function() {
       window.location.href = "/";
     });
 
-    // ICE sunucuları sabit, performans ve bağlantı kalitesi için iyi
+    // ICE servers
     const ICE_SERVERS = [
       { urls: "stun:stun.relay.metered.ca:80" },
-      {
-        urls: "turn:standard.relay.metered.ca:80",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      },
-      {
-        urls: "turn:standard.relay.metered.ca:80?transport=tcp",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      },
-      {
-        urls: "turn:standard.relay.metered.ca:443",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      },
-      {
-        urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-        username: "1d314db62543883bb998dd93",
-        credential: "9k8DwsDoeoJUikJP",
-      },
+      { urls: "turn:standard.relay.metered.ca:80", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" },
+      { urls: "turn:standard.relay.metered.ca:80?transport=tcp", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" },
+      { urls: "turn:standard.relay.metered.ca:443", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" },
+      { urls: "turns:standard.relay.metered.ca:443?transport=tcp", username: "1d314db62543883bb998dd93", credential: "9k8DwsDoeoJUikJP" }
     ];
 
     const room = "{{ room_id }}";
     document.getElementById("roomlink").innerText = window.location.href;
 
+    // KULLANICI ADI
     let username = localStorage.getItem("swipetogether_username");
     while (!username) {
       username = prompt("Odaya girmek için adını yaz:");
@@ -265,137 +92,175 @@
     const socket = io();
     let myStream = null;
     let isScreenSharer = false;
-    let peers = {};
-    let mySocketId = null;
+    let isSharing = false;
+    let peers = {}; // {socketId: peer}
 
+    let mySocketId = null;
     socket.on("connect", () => {
       mySocketId = socket.id;
-      socket.emit("join", { room, username });
     });
 
-    // Bir kullanıcı odaya katıldığında, eğer ben yayıncıysam ona peer başlat
+    // Odaya katıldığını bildir
+    socket.emit("join", { room, username });
+
+    // Ekran paylaşan kişi için: yeni biri gelirse onun için peer oluştur (initiator:true)
     socket.on("user-joined", ({ sid }) => {
       if (isScreenSharer && myStream && sid !== mySocketId && !peers[sid]) {
-        const peer = new SimplePeer({
+        let peer = new SimplePeer({
           initiator: true,
           trickle: false,
           stream: myStream,
-          config: { iceServers: ICE_SERVERS },
+          config: { iceServers: ICE_SERVERS }
         });
         peers[sid] = peer;
-
-        peer.on("signal", (signal) => {
+        peer.on("signal", signal => {
           socket.emit("signal", { room, signal, target: sid });
         });
-
-        peer.on("error", (err) => {
+        peer.on("error", err => {
           console.error("Peer error (initiator):", err);
         });
       }
     });
 
-    socket.on("signal", (data) => {
-      const sid = data.sid || data.target;
+    // Sinyal geldiğinde: İzleyici ise peer aç (initiator:false)
+    socket.on("signal", data => {
+      let sid = data.sid || data.target;
       if (!peers[sid]) {
-        // Gelen sinyal ile peer oluşturuluyor (cevaplayıcı taraf)
-        const peer = new SimplePeer({
+        let peer = new SimplePeer({
           initiator: false,
           trickle: false,
-          config: { iceServers: ICE_SERVERS },
+          config: { iceServers: ICE_SERVERS }
         });
         peers[sid] = peer;
-
-        peer.on("signal", (signal) => {
+        peer.on("signal", signal => {
           socket.emit("signal", { room, signal, target: sid });
         });
-
-        peer.on("error", (err) => {
-          console.error("Peer error (receiver):", err);
+        peer.on("stream", stream => {
+          document.getElementById("screen").srcObject = stream;
         });
-
-        peer.on("stream", (stream) => {
-          // Alınan stream ile video gösterilebilir (kendi ekranı göstermiyoruz)
-          // Örneğin: remote video element oluşturulabilir
-          // Ancak mevcut kodda bunu kullanmıyoruz, isteğe bağlı
+        peer.on("error", err => {
+          console.error("Peer error (viewer):", err);
         });
-      }
-      peers[sid].signal(data.signal);
-    });
-
-    socket.on("user-left", ({ sid }) => {
-      if (peers[sid]) {
-        peers[sid].destroy();
-        delete peers[sid];
+        peer.signal(data.signal);
+      } else {
+        peers[sid].signal(data.signal);
       }
     });
 
-    // Ekran paylaşımı başlat
+    // Ekran paylaşımı (mobil ve masaüstü tamamında serbest!)
+    function isScreenShareSupported() {
+      return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+    }
+
     async function startScreen() {
+      if (isSharing) return;
+      if (!isScreenShareSupported()) {
+        alert("Bu tarayıcıda ekran paylaşımı desteklenmiyor.");
+        return;
+      }
       try {
-        myStream = await navigator.mediaDevices.getDisplayMedia({
-          video: { cursor: "always", frameRate: 30, width: 1280, height: 720 },
-          audio: false,
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            frameRate: { ideal: 30 , max: 30 },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: true
         });
-        isScreenSharer = true;
-        isSharing = true;
-        document.getElementById("screen").srcObject = myStream;
-        document.getElementById("shareBtn").style.display = "none";
-        document.getElementById("stopBtn").style.display = "inline-block";
 
-        // Yayın başladığında tüm mevcut kullanıcılara peer bağlantısı kur
-        for (const sid in peers) {
-          peers[sid].destroy();
-          delete peers[sid];
+        // FPS constraint'ini tekrar uygula (bazı Chrome sürümlerinde zorunlu)
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack && videoTrack.applyConstraints) {
+          await videoTrack.applyConstraints({ frameRate: 30 });
         }
-        socket.emit("ready", { room }); // Yayına hazır olduğumuzu belirt
 
-        // Media stream bittiğinde otomatik durdur
-        myStream.getVideoTracks()[0].addEventListener("ended", () => {
-          stopScreen();
+        myStream = stream;
+        isSharing = true;
+        isScreenSharer = true;
+        document.getElementById("screen").srcObject = stream;
+        document.getElementById("shareBtn").disabled = true;
+        document.getElementById("stopBtn").style.display = "";
+        socket.emit("get-users", { room });
+
+        stream.getTracks().forEach(track => {
+          track.onended = stopScreen;
         });
-      } catch (err) {
-        alert("Ekran paylaşımı başlatılamadı: " + err.message);
+
+        // Peer bitrate ve FPS için parametreyi yükselt
+        Object.values(peers).forEach(peer => {
+          let sender = peer._pc.getSenders().find(s => s.track && s.track.kind === 'video');
+          if (sender) {
+            const parameters = sender.getParameters();
+            if (!parameters.encodings) parameters.encodings = [{}];
+            parameters.encodings[0].maxBitrate = 2_000_000; // 5 Mbps
+            parameters.encodings[0].maxFramerate = 30;
+            sender.setParameters(parameters);
+          }
+        });
+      } catch (e) {
+        if (e && e.name !== "AbortError") {
+          alert("Ekran paylaşımı başlatılamadı: " + e.message);
+        }
       }
     }
 
-    // Ekran paylaşımını durdur
     function stopScreen() {
       if (myStream) {
-        myStream.getTracks().forEach((track) => track.stop());
+        myStream.getTracks().forEach(track => track.stop());
         myStream = null;
       }
       isScreenSharer = false;
       isSharing = false;
       document.getElementById("screen").srcObject = null;
-      document.getElementById("shareBtn").style.display = "inline-block";
+      document.getElementById("shareBtn").disabled = false;
       document.getElementById("stopBtn").style.display = "none";
-
-      // Peer bağlantılarını temizle
       for (const sid in peers) {
-        peers[sid].destroy();
-        delete peers[sid];
+        try { peers[sid].destroy(); } catch (e) {}
       }
-      socket.emit("stop", { room }); // Yayını durdurduğumuzu bildir
+      peers = {};
     }
 
-    // Chat mesajı gönderme
-    function sendChat(event) {
-      event.preventDefault();
-      const input = document.getElementById("chatInput");
-      const msg = input.value.trim();
-      if (msg === "") return;
-      socket.emit("chat-message", { room, username, message: msg });
-      input.value = "";
+    // FPS'i ekranda görmek için (isteğe bağlı)
+    const video = document.getElementById('screen');
+    let lastFrame = performance.now();
+    let frames = 0;
+    function showFPS() {
+      frames++;
+      const now = performance.now();
+      if (now - lastFrame > 1000) {
+        video.title = FPS: ${frames};
+        frames = 0;
+        lastFrame = now;
+      }
+      requestAnimationFrame(showFPS);
     }
+    showFPS();
 
-    // Gelen chat mesajlarını listele
-    socket.on("chat-message", ({ username: user, message }) => {
-      const messages = document.getElementById("messages");
-      const newMsg = document.createElement("div");
-      newMsg.textContent = user + ": " + message;
-      messages.appendChild(newMsg);
-      messages.scrollTop = messages.scrollHeight;
+    // CHAT - HER ŞEY YAZILABİLİR!
+    function sendChat(e) {
+      e.preventDefault();
+      const msg = document.getElementById("chatInput").value.trim();
+      if (!msg) return;
+      socket.emit("chat", { room, msg, username });
+      document.getElementById("chatInput").value = "";
+    }
+    socket.on("chat", data => {
+      appendMsg(data.username || "Diğer", data.msg, data.sid === mySocketId);
     });
+
+    function appendMsg(from, text, isMe) {
+      const msgBox = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.innerHTML = <b>${from}${isMe ? " (Sen)" : ""}:</b> ${linkify(text)};
+      msgBox.appendChild(div);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    // Basit linkify: metindeki linkleri tıklanabilir yap
+    function linkify(text) {
+      const urlPattern = /(\bhttps?:\/\/[^\s]+)/gi;
+      return text.replace(urlPattern, '<a href="$1" target="_blank">$1</a>');
+    }
   </script>
 </body>
 </html>
