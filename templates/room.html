@@ -228,7 +228,7 @@
       frames++;
       const now = performance.now();
       if (now - lastFrame > 1000) {
-        video.title = FPS: ${frames};
+        video.title = `FPS: ${frames}`;
         frames = 0;
         lastFrame = now;
       }
@@ -251,7 +251,7 @@
     function appendMsg(from, text, isMe) {
       const msgBox = document.getElementById("messages");
       const div = document.createElement("div");
-      div.innerHTML = <b>${from}${isMe ? " (Sen)" : ""}:</b> ${linkify(text)};
+      div.innerHTML = `<b>${from}${isMe ? " (Sen)" : ""}:</b> ${linkify(text)}`;
       msgBox.appendChild(div);
       msgBox.scrollTop = msgBox.scrollHeight;
     }
